@@ -42,7 +42,6 @@ interface GameViewModel {
     val highscore: StateFlow<Int>
     val nBack: Int
     val eventInterval: Long
-    var eventCounter: Int
     val numberOfEvents: Int
 
     fun setGameType(gameType: GameType)
@@ -78,7 +77,9 @@ class GameVM(
     private val nBackHelper = NBackHelper()  // Helper that generate the event array
     private var events = emptyArray<Int>()  // Array with all events
 
-    override var eventCounter: Int = 0
+    var eventCounter: Int = 0
+
+    private var matchFoundThisRound = false
 
     private var tts: TextToSpeech? = null
 
@@ -134,7 +135,7 @@ class GameVM(
     }
 
     override fun checkMatch() {
-        if(eventCounter-1 < nBack || _gameState.value.eventValue == -1) return
+        if(matchFoundThisRound || eventCounter-1 < nBack || _gameState.value.eventValue == -1) return
 
         val isMatch = _gameState.value.eventValue == events[eventCounter-1 - nBack]
 
@@ -143,8 +144,8 @@ class GameVM(
             matchButtonColor = if (isMatch) Color.Green else Color.Red
         )
         if(isMatch){
+            matchFoundThisRound = true
             _score.value += 1
-            //_gameState.value =  _gameState.value.copy(eventValue = events[eventCounter])
         }
 
         viewModelScope.launch {
@@ -157,6 +158,7 @@ class GameVM(
         for (value in events){
             _gameState.value = _gameState.value.copy(eventValue = value)
             val letter = convertEventToLetter(_gameState.value.eventValue)
+            matchFoundThisRound = false
             speakLetter(letter)
             eventCounter++
             _gameState.value = _gameState.value.copy(eventCounter = eventCounter)
@@ -168,6 +170,7 @@ class GameVM(
         // Todo: Replace this code for actual game code
         for (value in events) {
             _gameState.value = _gameState.value.copy(eventValue = value)
+            matchFoundThisRound = false
             eventCounter++
             _gameState.value = _gameState.value.copy(eventCounter = eventCounter)
             delay(eventInterval)
@@ -224,9 +227,6 @@ class FakeVM: GameViewModel{
         get() = 2
     override val eventInterval: Long
         get() = 2000L
-    override var eventCounter: Int
-        get() = 0
-        set(value) {}
     override val numberOfEvents: Int
         get() = 10
 
