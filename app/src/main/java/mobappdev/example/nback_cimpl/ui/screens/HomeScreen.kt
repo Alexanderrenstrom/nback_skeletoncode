@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,9 +30,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 import mobappdev.example.nback_cimpl.R
 import mobappdev.example.nback_cimpl.ui.viewmodels.FakeVM
+import mobappdev.example.nback_cimpl.ui.viewmodels.GameType
 import mobappdev.example.nback_cimpl.ui.viewmodels.GameViewModel
 
 /**
@@ -49,6 +54,7 @@ import mobappdev.example.nback_cimpl.ui.viewmodels.GameViewModel
 
 @Composable
 fun HomeScreen(
+    navController: NavController,
     vm: GameViewModel
 ) {
     val highscore by vm.highscore.collectAsState()  // Highscore is its own StateFlow
@@ -74,29 +80,59 @@ fun HomeScreen(
             // Todo: You'll probably want to change this "BOX" part of the composable
             Box(
                 modifier = Modifier.weight(1f),
-                contentAlignment = Alignment.Center
             ) {
                 Column(
-                    Modifier.fillMaxWidth(),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    if (gameState.eventValue != -1) {
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = "Current eventValue is: ${gameState.eventValue}",
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                    Button(onClick = vm::startGame) {
-                        Text(text = "Generate eventValues")
-                    }
+                ){
+                    Text(
+                        "Current Game: ${gameState.gameType.toString()}",
+                        fontSize = 30.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    Text(
+                        "N-Back Value: ${vm.nBack}",
+                        fontSize = 30.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    Text(
+                        "Intervall: ${vm.eventInterval}ms",
+                        fontSize = 30.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    Text(
+                        "Number of Events: ${vm.numberOfEvents}",
+                        fontSize = 30.sp
+                    )
+
                 }
             }
-            Text(
+            Button(onClick = {
+                navController.navigate("game")
+
+                vm.startGame()
+            },
+                modifier = Modifier
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = "Start Game",
+                    fontSize = 30.sp
+                )
+            }
+            /*Text(
                 modifier = Modifier.padding(16.dp),
                 text = "Start Game".uppercase(),
                 style = MaterialTheme.typography.displaySmall
-            )
+            )*/
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -105,7 +141,7 @@ fun HomeScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Button(onClick = {
-                    // Todo: change this button behaviour
+                    vm.setGameType(GameType.Audio)
                     scope.launch {
                         snackBarHostState.showSnackbar(
                             message = "Hey! you clicked the audio button"
@@ -122,7 +158,7 @@ fun HomeScreen(
                 }
                 Button(
                     onClick = {
-                        // Todo: change this button behaviour
+                        vm.setGameType(GameType.Visual)
                         scope.launch {
                             snackBarHostState.showSnackbar(
                                 message = "Hey! you clicked the visual button",
@@ -148,6 +184,6 @@ fun HomeScreen(
 fun HomeScreenPreview() {
     // Since I am injecting a VM into my homescreen that depends on Application context, the preview doesn't work.
     Surface(){
-        HomeScreen(FakeVM())
+        HomeScreen(rememberNavController(),  FakeVM())
     }
 }

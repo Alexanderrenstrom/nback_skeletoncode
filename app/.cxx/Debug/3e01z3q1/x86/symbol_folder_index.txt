@@ -1,1 +1,1 @@
-/Users/yeetivity/AndroidStudioProjects/NBack_CImpl/app/build/intermediates/cxx/Debug/3e01z3q1/obj/x86
+C:\KTH\Mobila Applikationer\Labb\Labb 2\nback_skeletoncode\app\build\intermediates\cxx\Debug\3e01z3q1\obj\x86
